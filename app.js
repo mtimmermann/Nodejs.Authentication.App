@@ -5,7 +5,8 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
-    hash = require('./pass').hash;
+    hash = require('./pass').hash,
+    $ = require('jquery');
 
 var app = express();
 
@@ -21,8 +22,23 @@ var UserSchema = new mongoose.Schema({
     salt: String,
     hash: String
 });
-
 var User = mongoose.model('users', UserSchema);
+
+var ContactSchema = new mongoose.Schema({
+    firstName: String,
+    lastName: String,
+    email1: String,
+    email1_note: String,
+    phone1: String,
+    phone1_note: String,
+    city: String,
+    region: String,
+    country: String,
+    picture: String,
+    description: String
+});
+var Contact = mongoose.model('contacts', ContactSchema);
+
 /*
 Middlewares and configurations 
 */
@@ -49,7 +65,7 @@ app.use(function (req, res, next) {
 Helper Functions
 */
 function authenticate(name, pass, fn) {
-    if (!module.parent) console.log('authenticating %s:%s', name, pass);
+    //if (!module.parent) console.log('authenticating %s:%s', name, pass);
 
     User.findOne({
         username: name
@@ -188,6 +204,19 @@ app.get('/contacts', requiredAuthentication, function(req, res) {
         data: []
     }));
 });
+
+//app.post('/contacts', function(req, res) {
+app.post('/contacts', requiredAuthentication, function(req, res) {
+    var contactObj = req.body;
+    delete contactObj.id;
+
+    var contact = new Contact(contactObj).save(function (err, doc) {
+        if (err) throw err;
+        contactObj = $.extend(contactObj, { id: doc._id });
+        return res.send(JSON.stringify(contactObj));
+    });
+});
+
 
 // app.get('/profile', requiredAuthentication, function (req, res) {
 //     res.send('Profile page of '+ req.session.user.username +'<br>'+' click to <a href="/logout">logout</a>');
