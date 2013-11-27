@@ -233,26 +233,15 @@ app.get('/contacts', requiredAuthentication, function(req, res) {
     var pageSize = getIntParam(req.query.pageSize)
     var search = req.query.search;
 
-console.log('page: '+ page);
-
     if (search) {
-console.log('search');
-        // db.contacts.find({'$or':[
-        //     {'firstName':{'$regex':search, '$options':'i'}},
-        //     {'lastName':{'$regex':search, '$options':'i'}}]},
-        //     function(error, docs) {
-        //         if (error || !docs) {
-        //             // TODO: Logging
-        //             console.log(error);
-        //             res.statusCode = 500;
-        //             return res.send(JSON.stringify({
-        //                 code: res.statusCode,
-        //                 message: 'Server error',
-        //                 description: 'More details about the error here' }));
-        //         } else {
-        //             return res.send(JSON.stringify({ data: docs }))
-        //         }
-        // });
+        Contact.find({'$or':[
+            {'firstName':{'$regex':search, '$options':'i'}},
+            {'lastName':{'$regex':search, '$options':'i'}}]},
+            function(err, docs) {
+                if (err) throw err;
+                return res.send(JSON.stringify({ data: docs }));
+        });
+
     } else {
 
         $.when(getCountFunctionDefered()).done(function(count) {
@@ -287,13 +276,6 @@ console.log('search');
             }
         });
     }
-
-
-
-    // res.send(JSON.stringify({
-    //     totalRecords: 0,
-    //     data: []
-    // }));
 });
 
 //app.post('/contacts', function(req, res) {
