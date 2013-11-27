@@ -1,6 +1,4 @@
 
-
-//function requiredAuthentication(req, res, next) {
 exports.requiredAuthentication = function(req, res, next) {
     if (req.session.user) {
         next();

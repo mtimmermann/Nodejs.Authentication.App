@@ -4,22 +4,6 @@ var Contact = require('../models/Contact'),
 
 module.exports.controllers = function(app, mongoose) {
 
-    // Helper methods
-    function getIntParam(param) {
-        if (typeof param === 'string' && (/^\d+$/).test(param)) {
-            return parseInt(param, 10);
-        }
-        return null;
-    }
-
-    var getCountFunctionDefered = function() {
-        var deferred = $.Deferred();
-        Contact.count({}, function(err, count) {
-            deferred.resolve(count);
-        });
-        return deferred.promise();
-    }
-
 
     app.get('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
 
@@ -73,14 +57,89 @@ module.exports.controllers = function(app, mongoose) {
     });
 
 
+    app.get('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
+
+        Contact.findById(req.params.id, function(err, doc) {
+            if (doc) {
+                var result = doc.toObject();
+                result.id = doc._id;
+                delete result._id;
+                return res.send(JSON.stringify(result));
+            } else if (err) {
+                res.statusCode = 500;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'Server error',
+                    description: 'More details about the error here' }));
+            } else {
+                res.statusCode = 404;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'Error 404: contact not found'}));
+            }
+        });
+    });
+
+
+    app.put('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
+
+        var contactObj = req.body;
+        contactObj._id = db.ObjectId(req.params.id);
+        delete contactObj.id;
+
+        Contact.save(contactObj, function(err, doc) {
+            if (err) throw err;
+            // if (err || result == null) {
+            //     res.statusCode = 500;
+            //     return res.send(JSON.stringify({
+            //         code: res.statusCode,
+            //         message: 'Server error',
+            //         description: 'More details about the error here' }));
+            if (result !== null && result === 0) {
+                res.statusCode = 404;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'Error 404: contact not found'}));
+            } else {
+                var result = doc.toObject();
+                result.id = doc._id;
+                delete result._id;
+                return res.send(JSON.stringify(result));
+            }
+        });
+
+    });
+
+
     app.post('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
         var contactObj = req.body;
         delete contactObj.id;
 
         var contact = new Contact(contactObj).save(function (err, doc) {
             if (err) throw err;
-            contactObj = $.extend(contactObj, { id: doc._id });
-            return res.send(JSON.stringify(contactObj));
+            var result = doc.toObject();
+            result.id = doc._id;
+            delete result._id;
+            return res.send(JSON.stringify(result));
         });
     });
+
+
+
+    // Helper methods
+    function getIntParam(param) {
+        if (typeof param === 'string' && (/^\d+$/).test(param)) {
+            return parseInt(param, 10);
+        }
+        return null;
+    }
+
+    var getCountFunctionDefered = function() {
+        var deferred = $.Deferred();
+        Contact.count({}, function(err, count) {
+            deferred.resolve(count);
+        });
+        return deferred.promise();
+    }
+
 }
