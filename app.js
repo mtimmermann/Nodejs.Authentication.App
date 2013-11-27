@@ -144,9 +144,11 @@ Routes
 //     }
 // });
 
-app.post("/registration", userExist, function (req, res) {
+app.post("/register", userExist, function (req, res) {
     var password = req.body.password;
     var username = req.body.username;
+
+console.log('register');
 
     hash(password, function (err, salt, hash) {
         if (err) throw err;
