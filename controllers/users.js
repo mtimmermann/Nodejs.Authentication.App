@@ -1,9 +1,8 @@
-var User = require('../models/User.js'),
-    hash = require('../pass').hash;
+var User = require('../models/User'),
+    hash = require('../shared/pass').hash;
 //    mongoose = require('mongoose');
 
-//module.exports.controller = function(app, User) {
-module.exports.controller = function(app, mongoose) {
+module.exports.controllers = function(app, mongoose) {
 
     // Helper methods
     function authenticate(name, pass, fn) {

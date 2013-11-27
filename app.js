@@ -4,53 +4,26 @@
 // MVC w/ node & express
 // http://timstermatic.github.io/blog/2013/08/17/a-simple-mvc-framework-with-node-and-express/
 
-/*
-Module Dependencies 
-*/
+/**
+ * Module Dependencies 
+ */
 var express = require('express'),
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
     MongoSessionStore = require('connect-mongo')(express),
     //hash = require('./pass').hash,
-    $ = require('jquery'),
+    //$ = require('jquery'),
     fs = require('fs');
 
 var app = express();
 
 mongoose.connect("mongodb://localhost/nodejsauthapp");
 
-/*
-Database and Models
-*/
-/*var UserSchema = new mongoose.Schema({
-    email: String,
-    username: String,
-    password: String,
-    deleted: Boolean,
-    salt: String,
-    hash: String
-});
-var User = mongoose.model('users', UserSchema);*/
 
-var ContactSchema = new mongoose.Schema({
-    firstName: String,
-    lastName: String,
-    email1: String,
-    email1_note: String,
-    phone1: String,
-    phone1_note: String,
-    city: String,
-    region: String,
-    country: String,
-    picture: String,
-    description: String
-});
-var Contact = mongoose.model('contacts', ContactSchema);
-
-/*
-Middlewares and configurations 
-*/
+/**
+ * Middlewares and configurations 
+ */
 app.configure(function () {
     app.use(express.bodyParser());
     app.use(express.cookieParser('Authentication Tutorial '));
@@ -78,244 +51,15 @@ app.use(function (req, res, next) {
 });
 
 
-
-
-
-/*
-Helper Functions
-*/
-/*function authenticate(name, pass, fn) {
-    //if (!module.parent) console.log('authenticating %s:%s', name, pass);
-
-    User.findOne({
-        username: name
-    },
-
-    function (err, user) {
-        if (user) {
-            if (err) return fn(new Error('cannot find user'));
-            hash(pass, user.salt, function (err, hash) {
-                if (err) return fn(err);
-                if (hash == user.hash) return fn(null, user);
-                fn(new Error('invalid password'));
-            });
-        } else {
-            return fn(new Error('cannot find user'));
-        }
-    });
-}*/
-
-function requiredAuthentication(req, res, next) {
-    if (req.session.user) {
-        next();
-    } else {
-        var errorDescription = 'Access denied';
-        req.session.error = errorDescription;
-        res.statusCode = 403;
-        return res.send(JSON.stringify({
-            code: res.statusCode,
-            message: 'Not Authorized',
-            description: errorDescription }));
-        //res.redirect('/login');
-    }
-}
-
-/*function userExist(req, res, next) {
-    User.count({
-        username: req.body.username
-    }, function (err, count) {
-        if (count === 0) {
-            next();
-        } else {
-            req.session.error = "User Exist"
-            res.redirect("/signup");
-        }
-    });
-}*/
-
-
-
-// Dynamically include controller routes
+/**
+ * Dynamically include controller routes
+ */
 fs.readdirSync('./controllers').forEach(function (file) {
     if (file.substr(-3) === '.js') {
         route = require('./controllers/'+ file);
-        route.controller(app);
+        route.controllers(app);
     }
 });
 
 
-/*
-Routes
-*/
-// app.get("/", function (req, res) {
-
-//     if (req.session.user) {
-//         res.send("Welcome " + req.session.user.username + "<br>" + "<a href='/logout'>logout</a>");
-//     } else {
-//         res.send("<a href='/login'> Login</a>" + "<br>" + "<a href='/signup'> Sign Up</a>");
-//     }
-// });
-
-// app.get("/signup", function (req, res) {
-//     if (req.session.user) {
-//         res.redirect("/");
-//     } else {
-//         res.render("signup");
-//     }
-// });
-
-/*
-app.post("/register", userExist, function (req, res) {
-    var password = req.body.password;
-    var username = req.body.username;
-
-    hash(password, function (err, salt, hash) {
-        if (err) throw err;
-        var user = new User({
-            username: username,
-            deleted: false,
-            salt: salt,
-            hash: hash,
-        }).save(function (err, newUser) {
-            if (err) throw err;
-            authenticate(newUser.username, password, function(err, user) {
-                if(user) {
-                    req.session.regenerate(function(){
-                        req.session.user = user;
-                        req.session.success = 'Authenticated as ' + user.username;// + ' click to <a href="/logout">logout</a>. ' + ' You may now access <a href="/restricted">/restricted</a>.';
-                        //res.redirect('/');
-                        return res.send(JSON.stringify({
-                            IsSuccess: true }));
-                    });
-                }
-            });
-        });
-    });
-});
-
-// app.get("/login", function (req, res) {
-//     res.render("login");
-// });
-
-app.post("/login", function (req, res) {
-    authenticate(req.body.username, req.body.password, function (err, user) {
-        if (user) {
-            req.session.regenerate(function () {
-                req.session.user = user;
-                req.session.success = 'Authenticated as ' + user.username;// + ' click to <a href="/logout">logout</a>. ' + ' You may now access <a href="/restricted">/restricted</a>.';
-                //res.redirect('/');
-                return res.send(JSON.stringify({ IsSuccess: true }));
-            });
-        } else {
-            var errorDescription = 'Authentication failed, please check your username and password.';
-            req.session.error = errorDescription;
-            res.statusCode = 401;
-            return res.send(JSON.stringify({
-                code: res.statusCode,
-                message: 'Not Authorized',
-                description: errorDescription }));
-
-            //req.session.error = 'Authentication failed, please check your ' + ' username and password.';
-            //res.redirect('/login');
-        }
-    });
-});
-
-app.get('/logout', function (req, res) {
-    req.session.destroy(function () {
-        //res.redirect('/');
-        return res.send(JSON.stringify({ IsSuccess: true }));
-    });
-});
-*/
-
-function getIntParam(param) {
-    if (typeof param === 'string' && (/^\d+$/).test(param)) {
-        return parseInt(param, 10);
-    }
-    return null;
-}
-
-var getCountFunctionDefered = function() {
-    var deferred = $.Deferred();
-    //db.contacts.count(function(error, nbDocs) {
-    //    deferred.resolve(nbDocs);
-    //});
-    Contact.count({}, function(err, count) {
-        deferred.resolve(count);
-    });
-    return deferred.promise();
-};
-
-//app.get('/contacts', function(req, res) {
-app.get('/contacts', requiredAuthentication, function(req, res) {
-
-    var page = getIntParam(req.query.page);
-    var pageSize = getIntParam(req.query.pageSize)
-    var search = req.query.search;
-
-    if (search) {
-        Contact.find({'$or':[
-            {'firstName':{'$regex':search, '$options':'i'}},
-            {'lastName':{'$regex':search, '$options':'i'}}]},
-            function(err, docs) {
-                if (err) throw err;
-                return res.send(JSON.stringify({ data: docs }));
-        });
-
-    } else {
-
-        $.when(getCountFunctionDefered()).done(function(count) {
-
-            var sortBy = req.query.sort_by ? req.query.sort_by : 'lastName';
-            var argOrder = req.query.order ? req.query.order : 'asc';
-            var sortOrder = argOrder === 'desc' ? -1 : 1;
-            var sortObj = {};
-            sortObj[sortBy] = sortOrder;
-
-            if (page && pageSize) {
-                var top = (page -1) * pageSize;
-                var start = top - pageSize;
-                if (start < count) {
-
-                    // Note, the following sytax is used w/ Mongojs
-                    // TODO: Determine how to ingore case with sort
-                    // return db.contacts.find().sort(sortObj).skip((page-1) * pageSize).limit(pageSize, function(err, docs) {
-                    //     res.send(JSON.stringify({ totalRecords: count, page: page, data: docs }));
-                    // });
-
-                    // TODO: Determine how to ingore case with sort
-                    return Contact.find().sort(sortObj).skip((page-1) * pageSize).limit(pageSize).exec(function(err, docs) {
-                        res.send(JSON.stringify({ totalRecords: count, page: page, data: docs }));
-                    });
-                }
-                return res.send(JSON.stringify({ totalRecords: count, page: page, data: [] }));
-            } else {
-                return Contact.find().sort(sortObj).exec(function(err, docs) {
-                    res.send(JSON.stringify({ totalRecords: count, data: docs }));
-                });
-            }
-        });
-    }
-});
-
-//app.post('/contacts', function(req, res) {
-app.post('/contacts', requiredAuthentication, function(req, res) {
-    var contactObj = req.body;
-    delete contactObj.id;
-
-    var contact = new Contact(contactObj).save(function (err, doc) {
-        if (err) throw err;
-        contactObj = $.extend(contactObj, { id: doc._id });
-        return res.send(JSON.stringify(contactObj));
-    });
-});
-
-
-// app.get('/profile', requiredAuthentication, function (req, res) {
-//     res.send('Profile page of '+ req.session.user.username +'<br>'+' click to <a href="/logout">logout</a>');
-// });
-
-
-//http.createServer(app).listen(3000);
 http.createServer(app).listen(8003);
