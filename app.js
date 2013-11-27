@@ -8,6 +8,7 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
+    MongoSessionStore = require('connect-mongo')(express),
     hash = require('./pass').hash,
     $ = require('jquery');
 
@@ -48,7 +49,13 @@ Middlewares and configurations
 app.configure(function () {
     app.use(express.bodyParser());
     app.use(express.cookieParser('Authentication Tutorial '));
-    app.use(express.session());
+    app.use(express.session({
+        store: new MongoSessionStore({
+            url: 'mongodb://localhost/nodejsauthapp'
+        }),
+        secret: '1234567890QWERTY'
+    }));
+
     app.use(express.static(path.join(__dirname, 'public')));
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
