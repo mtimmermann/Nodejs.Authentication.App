@@ -148,8 +148,6 @@ app.post("/register", userExist, function (req, res) {
     var password = req.body.password;
     var username = req.body.username;
 
-console.log('register');
-
     hash(password, function (err, salt, hash) {
         if (err) throw err;
         var user = new User({
@@ -209,12 +207,93 @@ app.get('/logout', function (req, res) {
     });
 });
 
+
+function getIntParam(param) {
+    if (typeof param === 'string' && (/^\d+$/).test(param)) {
+        return parseInt(param, 10);
+    }
+    return null;
+}
+
+var getCountFunctionDefered = function() {
+    var deferred = $.Deferred();
+    //db.contacts.count(function(error, nbDocs) {
+    //    deferred.resolve(nbDocs);
+    //});
+    Contact.count({}, function(err, count) {
+        deferred.resolve(count);
+    });
+    return deferred.promise();
+};
+
 //app.get('/contacts', function(req, res) {
 app.get('/contacts', requiredAuthentication, function(req, res) {
-    res.send(JSON.stringify({
-        totalRecords: 0,
-        data: []
-    }));
+
+    var page = getIntParam(req.query.page);
+    var pageSize = getIntParam(req.query.pageSize)
+    var search = req.query.search;
+
+console.log('page: '+ page);
+
+    if (search) {
+console.log('search');
+        // db.contacts.find({'$or':[
+        //     {'firstName':{'$regex':search, '$options':'i'}},
+        //     {'lastName':{'$regex':search, '$options':'i'}}]},
+        //     function(error, docs) {
+        //         if (error || !docs) {
+        //             // TODO: Logging
+        //             console.log(error);
+        //             res.statusCode = 500;
+        //             return res.send(JSON.stringify({
+        //                 code: res.statusCode,
+        //                 message: 'Server error',
+        //                 description: 'More details about the error here' }));
+        //         } else {
+        //             return res.send(JSON.stringify({ data: docs }))
+        //         }
+        // });
+    } else {
+
+        $.when(getCountFunctionDefered()).done(function(count) {
+
+            var sortBy = req.query.sort_by ? req.query.sort_by : 'lastName';
+            var argOrder = req.query.order ? req.query.order : 'asc';
+            var sortOrder = argOrder === 'desc' ? -1 : 1;
+            var sortObj = {};
+            sortObj[sortBy] = sortOrder;
+
+            if (page && pageSize) {
+                var top = (page -1) * pageSize;
+                var start = top - pageSize;
+                if (start < count) {
+
+                    // Note, the following sytax is used w/ Mongojs
+                    // TODO: Determine how to ingore case with sort
+                    // return db.contacts.find().sort(sortObj).skip((page-1) * pageSize).limit(pageSize, function(err, docs) {
+                    //     res.send(JSON.stringify({ totalRecords: count, page: page, data: docs }));
+                    // });
+
+                    // TODO: Determine how to ingore case with sort
+                    return Contact.find().sort(sortObj).skip((page-1) * pageSize).limit(pageSize).exec(function(err, docs) {
+                        res.send(JSON.stringify({ totalRecords: count, page: page, data: docs }));
+                    });
+                }
+                return res.send(JSON.stringify({ totalRecords: count, page: page, data: [] }));
+            } else {
+                return Contact.find().sort(sortObj).exec(function(err, docs) {
+                    res.send(JSON.stringify({ totalRecords: count, data: docs }));
+                });
+            }
+        });
+    }
+
+
+
+    // res.send(JSON.stringify({
+    //     totalRecords: 0,
+    //     data: []
+    // }));
 });
 
 //app.post('/contacts', function(req, res) {
