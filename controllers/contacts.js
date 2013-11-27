@@ -90,30 +90,34 @@ module.exports.controllers = function(app, mongoose) {
     app.put('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
 
         var contactObj = req.body;
-        contactObj._id = db.ObjectId(req.params.id);
         delete contactObj.id;
 
-        Contact.save(contactObj, function(err, doc) {
+        Contact.findById(req.params.id, function(err, contact) {
             if (err) throw err;
-            // if (err || result == null) {
-            //     res.statusCode = 500;
-            //     return res.send(JSON.stringify({
-            //         code: res.statusCode,
-            //         message: 'Server error',
-            //         description: 'More details about the error here' }));
-            if (result !== null && result === 0) {
+            if (!contact) {
                 res.statusCode = 404;
                 return res.send(JSON.stringify({
                     code: res.statusCode,
-                    message: 'Error 404: contact not found'}));
+                    message: 'Error 404: contact not found'
+                }));
+            }
+            if (contact.ownerId === req.session.user._id) {
+                Contact.findByIdAndUpdate(req.params.id, contactObj, { new: true }, function(err, doc) {
+                    if (err) throw err;
+                    var result = doc.toObject();
+                    result.id = doc._id;
+                    delete result._id;
+                    return res.send(JSON.stringify(result));
+                });
             } else {
-                var result = doc.toObject();
-                result.id = doc._id;
-                delete result._id;
-                return res.send(JSON.stringify(result));
+                // User does not own contact, not authorized
+                res.statusCode = 403;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'Not Authorized'
+                }));
             }
         });
-
     });
 
     app.post('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
@@ -130,6 +134,32 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
+    app.delete('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
+
+        Contact.findById(req.params.id, function(err, doc) {
+            if (err) throw err;
+            if (!doc) {
+                res.statusCode = 404;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'Error 404: contact not found'
+                }));
+            }
+            if (doc.ownerId === req.session.user._id) {
+                Contact.findByIdAndRemove(req.params.id, function(err, result) {
+                    if (err) throw err;
+                    return res.send(JSON.stringify({ IsSuccess: true }));
+                });
+            } else {
+                // User does not own contact, not authorized
+                res.statusCode = 403;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'Not Authorized'
+                }));
+            }
+        });
+    });
 
 
     // Helper methods
