@@ -1,6 +1,9 @@
 // Mongo or Redis session storage
 // http://blog.modulus.io/nodejs-and-express-sessions
 
+// MVC w/ node & express
+// http://timstermatic.github.io/blog/2013/08/17/a-simple-mvc-framework-with-node-and-express/
+
 /*
 Module Dependencies 
 */
@@ -71,6 +74,8 @@ app.use(function (req, res, next) {
     if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
     next();
 });
+
+
 /*
 Helper Functions
 */
