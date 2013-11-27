@@ -4,7 +4,6 @@ var Contact = require('../models/Contact'),
 
 module.exports.controllers = function(app, mongoose) {
 
-
     app.get('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
 
         var page = getIntParam(req.query.page);

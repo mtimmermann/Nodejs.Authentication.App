@@ -16,26 +16,26 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.post("/register", userExist, function (req, res) {
+    app.post("/register", isUserUnique, function (req, res) {
+        var password = req.body.password;
 
-        hash(req.body.password, function (err, salt, hash) {
+        hash(password, function (err, salt, hash) {
             if (err) throw err;
             var user = new User({
-                email: req.body.email,
-                username: req.body.username,
+                email: req.body.email.toLowerCase(),
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
                 deleted: false,
                 salt: salt,
                 hash: hash,
             }).save(function (err, newUser) {
                 if (err) throw err;
-                authenticate(newUser.username, password, function(err, user) {
-                    if(user) {
-                        req.session.regenerate(function(){
+                authenticate(newUser.email, password, function(err, user) {
+                    if (user) {
+                        req.session.regenerate(function() {
                             req.session.user = user;
-                            req.session.success = 'Authenticated as ' + user.username;// + ' click to <a href="/logout">logout</a>. ' + ' You may now access <a href="/restricted">/restricted</a>.';
-                            //res.redirect('/');
-                            return res.send(JSON.stringify({
-                                IsSuccess: true }));
+                            req.session.success = 'Authenticated as ' + user.email;
+                            return res.send(JSON.stringify({ IsSuccess: true }));
                         });
                     }
                 });
@@ -48,8 +48,7 @@ module.exports.controllers = function(app, mongoose) {
             if (user) {
                 req.session.regenerate(function () {
                     req.session.user = user;
-                    req.session.success = 'Authenticated as ' + user.username;// + ' click to <a href="/logout">logout</a>. ' + ' You may now access <a href="/restricted">/restricted</a>.';
-                    //res.redirect('/');
+                    req.session.success = 'Authenticated as ' + user.email;
                     return res.send(JSON.stringify({ IsSuccess: true }));
                 });
             } else {
@@ -59,17 +58,14 @@ module.exports.controllers = function(app, mongoose) {
                 return res.send(JSON.stringify({
                     code: res.statusCode,
                     message: 'Not Authorized',
-                    description: errorDescription }));
-
-                //req.session.error = 'Authentication failed, please check your ' + ' username and password.';
-                //res.redirect('/login');
+                    description: errorDescription
+                }));
             }
         });
     });
 
     app.get('/logout', function (req, res) {
         req.session.destroy(function () {
-            //res.redirect('/');
             return res.send(JSON.stringify({ IsSuccess: true }));
         });
     });
@@ -80,7 +76,7 @@ module.exports.controllers = function(app, mongoose) {
         //if (!module.parent) console.log('authenticating %s:%s', name, pass);
 
         User.findOne({
-            username: name
+            email: name.toLowerCase()
         },
 
         function (err, user) {
@@ -97,15 +93,21 @@ module.exports.controllers = function(app, mongoose) {
         });
     }
 
-    function userExist(req, res, next) {
+    function isUserUnique(req, res, next) {
         User.count({
-            username: req.body.username
+            email: req.body.email
         }, function (err, count) {
             if (count === 0) {
                 next();
             } else {
-                req.session.error = "User Exist"
-                res.redirect("/signup");
+                var errorDescription = "409 Conflict: User exists";
+                req.session.error = errorDescription;
+                res.statusCode = 409;
+                return res.send(JSON.stringify({
+                    code: res.statusCode,
+                    message: 'User exists',
+                    description: errorDescription
+                }));
             }
         });
     }
