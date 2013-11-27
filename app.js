@@ -1,3 +1,6 @@
+// Mongo or Redis session storage
+// http://blog.modulus.io/nodejs-and-express-sessions
+
 /*
 Module Dependencies 
 */
