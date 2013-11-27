@@ -42,13 +42,14 @@ module.exports.controllers = function(app, mongoose) {
                         // });
 
                         // TODO: Determine how to ingore case with sort
-                        return Contact.find().sort(sortObj).skip((page-1) * pageSize).limit(pageSize).exec(function(err, docs) {
+                        //return Contact.find().sort(sortObj).skip((page-1) * pageSize).limit(pageSize).exec(function(err, docs) {
+                        return Contact.find({ ownerId: req.session.user._id }).sort(sortObj).skip((page-1) * pageSize).limit(pageSize).exec(function(err, docs) {
                             res.send(JSON.stringify({ totalRecords: count, page: page, data: docs }));
                         });
                     }
                     return res.send(JSON.stringify({ totalRecords: count, page: page, data: [] }));
                 } else {
-                    return Contact.find().sort(sortObj).exec(function(err, docs) {
+                    return Contact.find({ ownerId: req.session.user._id }).sort(sortObj).exec(function(err, docs) {
                         res.send(JSON.stringify({ totalRecords: count, data: docs }));
                     });
                 }
@@ -56,21 +57,28 @@ module.exports.controllers = function(app, mongoose) {
         }
     });
 
-
     app.get('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
+            if (err) throw err;
             if (doc) {
-                var result = doc.toObject();
-                result.id = doc._id;
-                delete result._id;
-                return res.send(JSON.stringify(result));
-            } else if (err) {
-                res.statusCode = 500;
-                return res.send(JSON.stringify({
-                    code: res.statusCode,
-                    message: 'Server error',
-                    description: 'More details about the error here' }));
+                if (doc.ownerId === req.session.user._id) {
+                    var result = doc.toObject();
+                    result.id = doc._id;
+                    delete result._id;
+                    return res.send(JSON.stringify(result));
+                } else {
+                    res.statusCode = 403;
+                    return res.send(JSON.stringify({
+                        code: res.statusCode,
+                        message: 'Not Authorized'}));
+                }
+            // } else if (err) {
+            //     res.statusCode = 500;
+            //     return res.send(JSON.stringify({
+            //         code: res.statusCode,
+            //         message: 'Server error',
+            //         description: 'More details about the error here' }));
             } else {
                 res.statusCode = 404;
                 return res.send(JSON.stringify({
@@ -79,7 +87,6 @@ module.exports.controllers = function(app, mongoose) {
             }
         });
     });
-
 
     app.put('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
 
@@ -110,10 +117,10 @@ module.exports.controllers = function(app, mongoose) {
 
     });
 
-
     app.post('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
         var contactObj = req.body;
         delete contactObj.id;
+        contactObj.ownerId = req.session.user._id;
 
         var contact = new Contact(contactObj).save(function (err, doc) {
             if (err) throw err;

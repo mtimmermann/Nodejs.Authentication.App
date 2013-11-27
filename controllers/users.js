@@ -17,15 +17,12 @@ module.exports.controllers = function(app, mongoose) {
     });
 
     app.post("/register", userExist, function (req, res) {
-        var email = req.body.email;
-        var username = req.body.username;
-        var password = req.body.password;
 
-        hash(password, function (err, salt, hash) {
+        hash(req.body.password, function (err, salt, hash) {
             if (err) throw err;
             var user = new User({
-                email: email,
-                username: username,
+                email: req.body.email,
+                username: req.body.username,
                 deleted: false,
                 salt: salt,
                 hash: hash,

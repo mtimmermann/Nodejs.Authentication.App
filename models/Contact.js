@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 
 var ContactSchema = new mongoose.Schema({
+    ownerId: String, // User id
     firstName: String,
     lastName: String,
     email1: String,
