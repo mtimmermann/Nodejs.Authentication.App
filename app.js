@@ -12,16 +12,18 @@ var express = require('express'),
     path = require('path'),
     mongoose = require('mongoose'),
     MongoSessionStore = require('connect-mongo')(express),
-    hash = require('./pass').hash,
-    $ = require('jquery');
+    //hash = require('./pass').hash,
+    $ = require('jquery'),
+    fs = require('fs');
 
 var app = express();
+
+mongoose.connect("mongodb://localhost/nodejsauthapp");
 
 /*
 Database and Models
 */
-mongoose.connect("mongodb://localhost/nodejsauthapp");
-var UserSchema = new mongoose.Schema({
+/*var UserSchema = new mongoose.Schema({
     email: String,
     username: String,
     password: String,
@@ -29,7 +31,7 @@ var UserSchema = new mongoose.Schema({
     salt: String,
     hash: String
 });
-var User = mongoose.model('users', UserSchema);
+var User = mongoose.model('users', UserSchema);*/
 
 var ContactSchema = new mongoose.Schema({
     firstName: String,
@@ -76,10 +78,13 @@ app.use(function (req, res, next) {
 });
 
 
+
+
+
 /*
 Helper Functions
 */
-function authenticate(name, pass, fn) {
+/*function authenticate(name, pass, fn) {
     //if (!module.parent) console.log('authenticating %s:%s', name, pass);
 
     User.findOne({
@@ -98,8 +103,7 @@ function authenticate(name, pass, fn) {
             return fn(new Error('cannot find user'));
         }
     });
-
-}
+}*/
 
 function requiredAuthentication(req, res, next) {
     if (req.session.user) {
@@ -116,7 +120,7 @@ function requiredAuthentication(req, res, next) {
     }
 }
 
-function userExist(req, res, next) {
+/*function userExist(req, res, next) {
     User.count({
         username: req.body.username
     }, function (err, count) {
@@ -127,7 +131,18 @@ function userExist(req, res, next) {
             res.redirect("/signup");
         }
     });
-}
+}*/
+
+
+
+// Dynamically include controller routes
+fs.readdirSync('./controllers').forEach(function (file) {
+    if (file.substr(-3) === '.js') {
+        route = require('./controllers/'+ file);
+        route.controller(app);
+    }
+});
+
 
 /*
 Routes
@@ -149,6 +164,7 @@ Routes
 //     }
 // });
 
+/*
 app.post("/register", userExist, function (req, res) {
     var password = req.body.password;
     var username = req.body.username;
@@ -211,7 +227,7 @@ app.get('/logout', function (req, res) {
         return res.send(JSON.stringify({ IsSuccess: true }));
     });
 });
-
+*/
 
 function getIntParam(param) {
     if (typeof param === 'string' && (/^\d+$/).test(param)) {
