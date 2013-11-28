@@ -16,7 +16,7 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.post("/register", isUserUnique, function (req, res) {
+    app.post('/register', isUserUnique, function (req, res) {
         var password = req.body.password;
 
         hash(password, function (err, salt, hash) {
@@ -43,7 +43,7 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.post("/login", function (req, res) {
+    app.post('/login', function (req, res) {
         authenticate(req.body.username, req.body.password, function (err, user) {
             if (user) {
                 req.session.regenerate(function () {
@@ -100,7 +100,7 @@ module.exports.controllers = function(app, mongoose) {
             if (count === 0) {
                 next();
             } else {
-                var errorDescription = "409 Conflict: User exists";
+                var errorDescription = '409 Conflict: User exists';
                 req.session.error = errorDescription;
                 res.statusCode = 409;
                 return res.send(JSON.stringify({

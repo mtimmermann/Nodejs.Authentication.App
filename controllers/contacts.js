@@ -163,6 +163,32 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
+    app.post('/uploader', function(req, res) {
+        var path = 'pics/'
+
+        // http://markdawson.tumblr.com/post/18359176420/asynchronous-file-uploading-using-express-and-node-js
+        require('fs').rename(
+            req.files.file.path,
+            path + req.files.file.name,
+            function(error) {
+                if (error) {
+                    console.log(error);
+                    res.statusCode = 500;
+                    res.json({
+                        code: res.statusCode,
+                        message: 'Uploading process failed'
+                    });
+                    return;
+                }
+
+                return res.json({
+                    IsSuccess: true,
+                    path: path + req.files.file.name
+                });
+            }
+        );
+    });
+
 
     // Helper methods
     function getIntParam(param) {
