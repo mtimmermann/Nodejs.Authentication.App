@@ -170,7 +170,7 @@ module.exports.controllers = function(app, mongoose) {
         return null;
     }
 
-    var getCountFunctionDefered = function() {
+    function getCountFunctionDefered() {
         var deferred = $.Deferred();
         Contact.count({}, function(err, count) {
             deferred.resolve(count);

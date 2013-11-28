@@ -12,8 +12,6 @@ var express = require('express'),
     path = require('path'),
     mongoose = require('mongoose'),
     MongoSessionStore = require('connect-mongo')(express),
-    //hash = require('./pass').hash,
-    //$ = require('jquery'),
     fs = require('fs');
 
 var app = express();
@@ -26,7 +24,7 @@ mongoose.connect("mongodb://localhost/nodejsauthapp");
  */
 app.configure(function () {
     app.use(express.bodyParser());
-    app.use(express.cookieParser('Authentication Tutorial '));
+    app.use(express.cookieParser('Contacts App'));
     app.use(express.session({
         store: new MongoSessionStore({
             url: 'mongodb://localhost/nodejsauthapp'
@@ -34,9 +32,9 @@ app.configure(function () {
         secret: '1234567890QWERTY'
     }));
 
-    app.use(express.static(path.join(__dirname, 'public')));
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade');
+    // app.use(express.static(path.join(__dirname, 'public')));
+    // app.set('views', __dirname + '/views');
+    // app.set('view engine', 'jade');
 });
 
 app.use(function (req, res, next) {
