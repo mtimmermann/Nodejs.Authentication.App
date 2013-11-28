@@ -11,17 +11,19 @@ module.exports.controllers = function(app, mongoose) {
         var search = req.query.search;
 
         if (search) {
-            Contact.find({'$or':[
-                {'firstName':{'$regex':search, '$options':'i'}},
-                {'lastName':{'$regex':search, '$options':'i'}}]},
+            Contact.find(
+                {
+                    ownerId: req.session.user._id,
+                    '$or':[
+                        {'firstName':{'$regex':search, '$options':'i'}},
+                        {'lastName':{'$regex':search, '$options':'i'}}]
+                },
                 function(err, docs) {
                     if (err) throw err;
                     return res.send(JSON.stringify({ data: docs }));
             });
-
         } else {
-
-            $.when(getCountFunctionDefered()).done(function(count) {
+            $.when(getCountFunctionDefered(req.session.user._id)).done(function(count) {
 
                 var sortBy = req.query.sort_by ? req.query.sort_by : 'lastName';
                 var argOrder = req.query.order ? req.query.order : 'asc';
@@ -170,9 +172,9 @@ module.exports.controllers = function(app, mongoose) {
         return null;
     }
 
-    function getCountFunctionDefered() {
+    function getCountFunctionDefered(userId) {
         var deferred = $.Deferred();
-        Contact.count({}, function(err, count) {
+        Contact.count({ ownerId: userId }, function(err, count) {
             deferred.resolve(count);
         });
         return deferred.promise();
