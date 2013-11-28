@@ -1,5 +1,6 @@
 var Contact = require('../models/Contact'),
     ControllerAuth = require('../shared/controllerauth'),
+    fs = require('fs'),
     $ = require('jquery');
 
 module.exports.controllers = function(app, mongoose) {
@@ -163,8 +164,12 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.post('/uploader', function(req, res) {
-        var path = 'pics/'
+    app.post('/uploader', ControllerAuth.requiredAuthentication, function(req, res) {
+        var path = 'pics/'+ req.session.user._id +'/';
+
+        if (!fs.existsSync(path)) {
+            fs.mkdirSync(path);
+        }
 
         // http://markdawson.tumblr.com/post/18359176420/asynchronous-file-uploading-using-express-and-node-js
         require('fs').rename(
@@ -174,17 +179,16 @@ module.exports.controllers = function(app, mongoose) {
                 if (error) {
                     console.log(error);
                     res.statusCode = 500;
-                    res.json({
+                    return res.json({
                         code: res.statusCode,
                         message: 'Uploading process failed'
                     });
-                    return;
+                } else {
+                    return res.json({
+                        IsSuccess: true,
+                        path: path + req.files.file.name
+                    });
                 }
-
-                return res.json({
-                    IsSuccess: true,
-                    path: path + req.files.file.name
-                });
             }
         );
     });
