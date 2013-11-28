@@ -1,4 +1,23 @@
-#user  nobody;
+Nodejs.Authentication.App
+=========================
+
+A simple NodeJS application which includes authorized session management (using express, and storing sessions in a Mongo db).  This app serves as a resful service to the [Nodejs.Authentication.UI](https://github.com/mtimmermann/Nodejs.Authentication.UI) website project.
+
+
+## Prerequisites ##
+[Node.js](http://nodejs.org/) must be installed in order to build this and run this app.
+
+[MongoDB](http://www.mongodb.org/)
+
+I am also using NGINX to serve up the static content the of the [Nodejs.Authentication.UI](https://github.com/mtimmermann/Nodejs.Authentication.UI) site, and handle proxy passes to this app (see the configuration and setup notes below).
+
+
+## Configuration ##
+
+Below is the basic configuration I'm using...
+
+The nginx.conf file used for this project:
+```
 worker_processes  1;
 
 #error_log  logs/error.log;
@@ -26,7 +45,6 @@ http {
     sendfile        on;
     #tcp_nopush     on;
 
-    #keepalive_timeout  0;
     keepalive_timeout  65;
 
     #gzip  on;
@@ -71,26 +89,33 @@ http {
            proxy_set_header    X-Scheme $scheme;
        }
     }
-
-    # HTTPS server
-    #
-    #server {
-    #    listen       443 ssl;
-    #    server_name  localhost;
-
-    #    ssl_certificate      cert.pem;
-    #    ssl_certificate_key  cert.key;
-
-    #    ssl_session_cache    shared:SSL:1m;
-    #    ssl_session_timeout  5m;
-
-    #    ssl_ciphers  HIGH:!aNULL:!MD5;
-    #    ssl_prefer_server_ciphers  on;
-
-    #    location / {
-    #        root   html;
-    #        index  index.html index.htm;
-    #    }
-    #}
-
 }
+```
+
+If installing NGINX, I've created a bash script to retrieve and build NGINX(v.1.5.6) located at /config/  run at your own risk (and always investigate a script, program, etc... before running).
+
+
+/etc/hosts
+```
+127.0.0.1   contacts.marionette.dev
+```
+
+Symlinks in /opt/mark/www/ :
+```
+contactsmarionettepics -> /home/mark/Projects/Contacts.Marionette.App/pics/
+contactsmarionetteui -> /home/mark/Projects/Contacts.Marionette.UI/deploy/
+```
+
+
+## Setup ##
+After NodeJS, MongoDB, and NGINX (or other) are installed...
+
+Install the project dependencies:
+**npm install**
+
+Initialize the Mongo DB, from the root of the project directory run:
+**node config/initialize_db.js**
+
+Run the app
+**node app.js**
+
