@@ -3,9 +3,9 @@ var Contact = require('../models/Contact'),
     fs = require('fs'),
     $ = require('jquery');
 
-module.exports.controllers = function(app, mongoose) {
+module.exports.controllers = function(app) {//, mongoose) {
 
-    app.get('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.get('/contacts', ControllerAuth.authorize, function(req, res) {
 
         var page = getIntParam(req.query.page);
         var pageSize = getIntParam(req.query.pageSize)
@@ -59,7 +59,7 @@ module.exports.controllers = function(app, mongoose) {
         }
     });
 
-    app.get('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.get('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
             if (err) throw err;
@@ -90,7 +90,7 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.put('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.put('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         var contactObj = req.body;
         delete contactObj.id;
@@ -123,7 +123,7 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.post('/contacts', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.post('/contacts', ControllerAuth.authorize, function(req, res) {
         var contactObj = req.body;
         delete contactObj.id;
         contactObj.ownerId = req.session.user._id;
@@ -137,7 +137,7 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.delete('/contacts/:id', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.delete('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
             if (err) throw err;
@@ -164,7 +164,7 @@ module.exports.controllers = function(app, mongoose) {
         });
     });
 
-    app.post('/uploader', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.post('/uploader', ControllerAuth.authorize, function(req, res) {
         var path = 'pics/'+ req.session.user._id +'/';
 
         if (!fs.existsSync(path)) {

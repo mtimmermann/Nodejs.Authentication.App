@@ -4,7 +4,7 @@ var User = require('../models/User'),
 
 module.exports.controllers = function(app, mongoose) {
 
-    app.get('/user', ControllerAuth.requiredAuthentication, function(req, res) {
+    app.get('/user', ControllerAuth.authorize, function(req, res) {
         return User.findById(req.session.user._id, function(err, doc) {
             if (err) throw err;
             var result = doc.toObject();

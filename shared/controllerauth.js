@@ -1,5 +1,5 @@
 
-exports.requiredAuthentication = function(req, res, next) {
+exports.authorize = function(req, res, next) {
     if (req.session.user) {
         next();
     } else {
