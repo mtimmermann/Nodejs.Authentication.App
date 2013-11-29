@@ -1,6 +1,6 @@
 var Contact = require('../models/Contact'),
     ControllerAuth = require('../shared/controller_auth'),
-    ControllerError = require('../shared/controller_error'),
+    errorHandler = require('../shared/controller_error_handler').errorHandler,
     fs = require('fs'),
     $ = require('jquery');
 
@@ -21,7 +21,7 @@ module.exports.controllers = function(app) {
                         {'lastName':{'$regex':search, '$options':'i'}}]
                 },
                 function(err, docs) {
-                    if (err) { return ControllerError.errorHandler(req, res, err); }
+                    if (err) { return errorHandler(req, res, err); }
                     res.send(JSON.stringify({ data: docs }));
             });
         } else {
@@ -63,7 +63,7 @@ module.exports.controllers = function(app) {
     app.get('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
-            if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (err) { return errorHandler(req, res, err); }
             if (doc) {
                 if (doc.ownerId === req.session.user._id) {
                     var result = doc.toObject();
@@ -97,7 +97,7 @@ module.exports.controllers = function(app) {
         delete contactObj.id;
 
         Contact.findById(req.params.id, function(err, contact) {
-            if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (err) { return errorHandler(req, res, err); }
             if (!contact) {
                 res.statusCode = 404;
                 res.send(JSON.stringify({
@@ -107,7 +107,7 @@ module.exports.controllers = function(app) {
             }
             if (contact.ownerId === req.session.user._id) {
                 Contact.findByIdAndUpdate(req.params.id, contactObj, { new: true }, function(err, doc) {
-                    if (err) { return ControllerError.errorHandler(req, res, err); }
+                    if (err) { return errorHandler(req, res, err); }
                     var result = doc.toObject();
                     result.id = doc._id;
                     delete result._id;
@@ -130,7 +130,7 @@ module.exports.controllers = function(app) {
         contactObj.ownerId = req.session.user._id;
 
         var contact = new Contact(contactObj).save(function (err, doc) {
-            if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (err) { return errorHandler(req, res, err); }
             var result = doc.toObject();
             result.id = doc._id;
             delete result._id;
@@ -141,7 +141,7 @@ module.exports.controllers = function(app) {
     app.delete('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
-            if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (err) { return errorHandler(req, res, err); }
             if (!doc) {
                 res.statusCode = 404;
                 res.send(JSON.stringify({
@@ -151,7 +151,7 @@ module.exports.controllers = function(app) {
             }
             if (doc.ownerId === req.session.user._id) {
                 Contact.findByIdAndRemove(req.params.id, function(err, result) {
-                    if (err) { return ControllerError.errorHandler(req, res, err); }
+                    if (err) { return errorHandler(req, res, err); }
                     res.send(JSON.stringify({ IsSuccess: true }));
                 });
             } else {

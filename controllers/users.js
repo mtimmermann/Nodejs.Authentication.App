@@ -1,6 +1,6 @@
 var User = require('../models/User'),
     ControllerAuth = require('../shared/controller_auth'),
-    ControllerError = require('../shared/controller_error'),
+    errorHandler = require('../shared/controller_error_handler').errorHandler,
     ApplicationError = require('../shared/error/ApplicationError'),
     hash = require('../shared/pass').hash,
     logger = require('../shared/logger'),
@@ -11,7 +11,7 @@ module.exports.controllers = function(app) {
 
     app.get('/user', ControllerAuth.authorize, function(req, res) {
         return User.findById(req.session.user._id, function(err, user) {
-            if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (err) { return errorHandler(req, res, err); }
             if (!user) {
                 // Handling the case where a user has been removed, but the
                 //  session still exists in the db.
@@ -20,7 +20,7 @@ module.exports.controllers = function(app) {
                     'session', req.session.user._id));
                 err.status = 500;
                 req.session.destroy();
-                return ControllerError.errorHandler(req, res, err);
+                return errorHandler(req, res, err);
             }
 
             var result = user.toObject();
@@ -53,7 +53,7 @@ module.exports.controllers = function(app) {
         // TODO: User model validation, add email regex
 
         hash(password, function (err, salt, hash) {
-            if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (err) { return errorHandler(req, res, err); }
             var user = new User({
                 email: req.body.email.toLowerCase(),
                 firstName: req.body.firstName,
@@ -62,7 +62,7 @@ module.exports.controllers = function(app) {
                 salt: salt,
                 hash: hash,
             }).save(function (err, newUser) {
-                if (err) { return ControllerError.errorHandler(req, res, err); }
+                if (err) { return errorHandler(req, res, err); }
 
                 authenticate(newUser.email, password, function(err, user) {
                     if (user) {
@@ -95,7 +95,7 @@ module.exports.controllers = function(app) {
                             description: errorDescription
                         }));
                 } else {
-                    return ControllerError.errorHandler(req, res, err);
+                    return errorHandler(req, res, err);
                 }
             }
 
