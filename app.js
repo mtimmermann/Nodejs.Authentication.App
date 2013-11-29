@@ -5,20 +5,25 @@
 // http://timstermatic.github.io/blog/2013/08/17/a-simple-mvc-framework-with-node-and-express/
 
 /**
- * Module Dependencies 
+ * External Module Dependencies 
  */
 var express = require('express'),
-    settings = require('./config/application.config').application,
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
     MongoSessionStore = require('connect-mongo')(express),
-    fs = require('fs'),
+    fs = require('fs');
+
+/**
+ * Internal Module Dependencies 
+ */
+var settings = require('./config/application.config').application,
     logger = require('./shared/logger');
+
 
 var app = express();
 
-mongoose.connect("mongodb://localhost/nodejsauthapp");
+mongoose.connect(settings.db.url);
 
 
 /**
@@ -29,7 +34,7 @@ app.configure(function () {
     app.use(express.cookieParser('Contacts App'));
     app.use(express.session({
         store: new MongoSessionStore({
-            url: 'mongodb://localhost/nodejsauthapp'
+            url: settings.db.url
         }),
         secret: '1234567890QWERTY'
     }));

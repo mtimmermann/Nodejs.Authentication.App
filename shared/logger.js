@@ -1,5 +1,5 @@
 var winston = require('winston'),
-    logLevel = require('../config/application.config').logging.level;
+    logSettings = require('../config/application.config').logging;
 
 //require('winston-riak').Riak;
 require('winston-mongodb').Mongo;
@@ -21,21 +21,33 @@ require('winston-mongodb').Mongo;
 
 var logger = new (winston.Logger)({
     transports: [
-        new winston.transports.Console({ level: logLevel }),
-        //new winston.transports.File({ filename: 'logs/application.log', level: logLevel, maxsize: 20000 }),
+        new winston.transports.Console({ level: logSettings.logLevel }),
+
+        //new winston.transports.File({ filename: 'logs/application.log', level: logSettings.logLevel, maxsize: 20000 }),
         new winston.transports.DailyRotateFile({
-            filename: 'logs/application.log',
+            filename: logSettings.logFileRolling,
             datePattern: '.yyyy-MM-dd',
             maxsize: 20000,
             maxFiles: 20,
-            level: logLevel
+            level: logSettings.logLevel
         }),
+
+        // TODO: Configure "authDb" auth object
+        // TODO: Configure "username", "password"
+        // https://npmjs.org/package/winston-mongodb
+        new winston.transports.MongoDB({
+            db: logSettings.db.database,
+            port: logSettings.db.port,
+            host: logSettings.db.host,
+            safe: false, // If true(default), second round trip to db to confirm log entry
+            level: logSettings.logLevel
+        })
+
         //new winston.transports.Couchdb({ 'host': 'localhost', 'db': 'logs' })
         //new winston.transports.Riak({ bucket: 'logs' })
-        new winston.transports.MongoDB({ db: 'nodejsauthapp_logs', level: logLevel })
     ],
     exceptionHandlers: [
-        new winston.transports.File({ filename: 'logs/exceptions.log' })
+        new winston.transports.File({ filename: logSettings.logFileExcpetion })
     ]
 });
 
