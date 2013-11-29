@@ -19,6 +19,8 @@ module.exports.controllers = function(app, mongoose) {
     app.post('/register', isUserUnique, function (req, res) {
         var password = req.body.password;
 
+        // TODO: Validate incoming data
+
         hash(password, function (err, salt, hash) {
             if (err) throw err;
             var user = new User({
