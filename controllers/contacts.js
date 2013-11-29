@@ -21,8 +21,8 @@ module.exports.controllers = function(app) {
                         {'lastName':{'$regex':search, '$options':'i'}}]
                 },
                 function(err, docs) {
-                    if (err) throw err;
-                    return res.send(JSON.stringify({ data: docs }));
+                    if (err) { return ControllerError.errorHandler(req, res, err); }
+                    res.send(JSON.stringify({ data: docs }));
             });
         } else {
             $.when(getCountFunctionDefered(req.session.user._id)).done(function(count) {
@@ -50,7 +50,7 @@ module.exports.controllers = function(app) {
                             res.send(JSON.stringify({ totalRecords: count, page: page, data: docs }));
                         });
                     }
-                    return res.send(JSON.stringify({ totalRecords: count, page: page, data: [] }));
+                    res.send(JSON.stringify({ totalRecords: count, page: page, data: [] }));
                 } else {
                     return Contact.find({ ownerId: req.session.user._id }).sort(sortObj).exec(function(err, docs) {
                         res.send(JSON.stringify({ totalRecords: count, data: docs }));
@@ -63,16 +63,16 @@ module.exports.controllers = function(app) {
     app.get('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
-            if (err) throw err;
+            if (err) { return ControllerError.errorHandler(req, res, err); }
             if (doc) {
                 if (doc.ownerId === req.session.user._id) {
                     var result = doc.toObject();
                     result.id = doc._id;
                     delete result._id;
-                    return res.send(JSON.stringify(result));
+                    res.send(JSON.stringify(result));
                 } else {
                     res.statusCode = 403;
-                    return res.send(JSON.stringify({
+                    res.send(JSON.stringify({
                         code: res.statusCode,
                         message: 'Not Authorized'}));
                 }
@@ -97,26 +97,26 @@ module.exports.controllers = function(app) {
         delete contactObj.id;
 
         Contact.findById(req.params.id, function(err, contact) {
-            if (err) throw err;
+            if (err) { return ControllerError.errorHandler(req, res, err); }
             if (!contact) {
                 res.statusCode = 404;
-                return res.send(JSON.stringify({
+                res.send(JSON.stringify({
                     code: res.statusCode,
                     message: 'Error 404: contact not found'
                 }));
             }
             if (contact.ownerId === req.session.user._id) {
                 Contact.findByIdAndUpdate(req.params.id, contactObj, { new: true }, function(err, doc) {
-                    if (err) throw err;
+                    if (err) { return ControllerError.errorHandler(req, res, err); }
                     var result = doc.toObject();
                     result.id = doc._id;
                     delete result._id;
-                    return res.send(JSON.stringify(result));
+                    res.send(JSON.stringify(result));
                 });
             } else {
                 // User does not own contact, not authorized
                 res.statusCode = 403;
-                return res.send(JSON.stringify({
+                res.send(JSON.stringify({
                     code: res.statusCode,
                     message: 'Not Authorized'
                 }));
@@ -130,35 +130,34 @@ module.exports.controllers = function(app) {
         contactObj.ownerId = req.session.user._id;
 
         var contact = new Contact(contactObj).save(function (err, doc) {
-//            if (err) throw err;
             if (err) { return ControllerError.errorHandler(req, res, err); }
             var result = doc.toObject();
             result.id = doc._id;
             delete result._id;
-            return res.send(JSON.stringify(result));
+            res.send(JSON.stringify(result));
         });
     });
 
     app.delete('/contacts/:id', ControllerAuth.authorize, function(req, res) {
 
         Contact.findById(req.params.id, function(err, doc) {
-            if (err) throw err;
+            if (err) { return ControllerError.errorHandler(req, res, err); }
             if (!doc) {
                 res.statusCode = 404;
-                return res.send(JSON.stringify({
+                res.send(JSON.stringify({
                     code: res.statusCode,
                     message: 'Error 404: contact not found'
                 }));
             }
             if (doc.ownerId === req.session.user._id) {
                 Contact.findByIdAndRemove(req.params.id, function(err, result) {
-                    if (err) throw err;
-                    return res.send(JSON.stringify({ IsSuccess: true }));
+                    if (err) { return ControllerError.errorHandler(req, res, err); }
+                    res.send(JSON.stringify({ IsSuccess: true }));
                 });
             } else {
                 // User does not own contact, not authorized
                 res.statusCode = 403;
-                return res.send(JSON.stringify({
+                res.send(JSON.stringify({
                     code: res.statusCode,
                     message: 'Not Authorized'
                 }));
@@ -181,12 +180,12 @@ module.exports.controllers = function(app) {
                 if (error) {
                     console.log(error);
                     res.statusCode = 500;
-                    return res.json({
+                    res.json({
                         code: res.statusCode,
                         message: 'Uploading process failed'
                     });
                 } else {
-                    return res.json({
+                    res.json({
                         IsSuccess: true,
                         path: path + req.files.file.name
                     });
@@ -196,7 +195,9 @@ module.exports.controllers = function(app) {
     });
 
 
-    // Helper methods
+    /**
+     * Helper methods
+     */
     function getIntParam(param) {
         if (typeof param === 'string' && (/^\d+$/).test(param)) {
             return parseInt(param, 10);
