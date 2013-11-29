@@ -12,7 +12,8 @@ var express = require('express'),
     path = require('path'),
     mongoose = require('mongoose'),
     MongoSessionStore = require('connect-mongo')(express),
-    fs = require('fs');
+    fs = require('fs'),
+    logger = require('./shared/logger');
 
 var app = express();
 
@@ -59,5 +60,12 @@ fs.readdirSync('./controllers').forEach(function (file) {
     }
 });
 
+
+// logger.log('silly', 'silly test');
+// logger.log('debug', 'debug test');
+// logger.log('verbose', 'verbose test');
+// logger.log('info', 'info test');
+// logger.log('warn', 'warn test');
+// logger.log('error', 'error test');
 
 http.createServer(app).listen(8003);

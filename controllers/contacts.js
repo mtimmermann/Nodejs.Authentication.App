@@ -3,7 +3,7 @@ var Contact = require('../models/Contact'),
     fs = require('fs'),
     $ = require('jquery');
 
-module.exports.controllers = function(app) {//, mongoose) {
+module.exports.controllers = function(app) {
 
     app.get('/contacts', ControllerAuth.authorize, function(req, res) {
 

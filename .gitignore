@@ -3,6 +3,8 @@
 /pics/*.jpg
 /pics/*.png
 
+/logs/*.log
+
 /tests/curl_scripts/*.tmp_body
 /tests/curl_scripts/*.tmp_login
 /tests/curl_scripts/*.tmp_login.bak

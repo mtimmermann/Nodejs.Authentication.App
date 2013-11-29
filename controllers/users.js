@@ -2,7 +2,7 @@ var User = require('../models/User'),
     ControllerAuth = require('../shared/controllerauth'),
     hash = require('../shared/pass').hash;
 
-module.exports.controllers = function(app, mongoose) {
+module.exports.controllers = function(app) {
 
     app.get('/user', ControllerAuth.authorize, function(req, res) {
         return User.findById(req.session.user._id, function(err, doc) {
