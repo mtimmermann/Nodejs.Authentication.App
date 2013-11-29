@@ -14,6 +14,7 @@ module.exports.controllers = function(app) {
                 err = new Error('Cannot find user (id:'+ req.session.user._id +') '+
                     'authroized session', req.session.user._id);
                 err.status = 500;
+                req.session.destroy();
                 return ControllerError.errorHandler(req, res, err);
             }
 
