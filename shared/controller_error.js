@@ -21,7 +21,7 @@ exports.errorHandler = function(req, res, err) {
 
     // Unhandled error
     else {
-        logger.log('err', err);
+        logger.log('error', err);
         res.statusCode = 500;
         res.send(JSON.stringify({
             code: res.statusCode,

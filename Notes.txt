@@ -51,3 +51,9 @@ Mongoose validation
 http://mongoosejs.com/docs/validation.html
 
 
+Exceptions
+----------
+See the mongoose repo for Error classes
+https://github.com/LearnBoost/mongoose/blob/master/lib/error.js
+https://github.com/LearnBoost/mongoose/tree/master/lib/error
+

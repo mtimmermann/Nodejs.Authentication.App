@@ -10,6 +10,13 @@ module.exports.controllers = function(app) {
     app.get('/user', ControllerAuth.authorize, function(req, res) {
         return User.findById(req.session.user._id, function(err, doc) {
             if (err) { return ControllerError.errorHandler(req, res, err); }
+            if (!doc) {
+                err = new Error('Cannot find user (id:'+ req.session.user._id +') '+
+                    'authroized session', req.session.user._id);
+                err.status = 500;
+                return ControllerError.errorHandler(req, res, err);
+            }
+
             var result = doc.toObject();
             result.id = doc._id;
             delete result._id;
