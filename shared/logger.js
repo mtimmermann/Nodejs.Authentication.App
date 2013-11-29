@@ -1,4 +1,5 @@
-var winston = require('winston');
+var winston = require('winston'),
+    logLevel = require('../config/application.config').logging.level;
 
 // https://github.com/flatiron/winston
 // http://docs.nodejitsu.com/articles/intermediate/how-to-log
@@ -19,8 +20,10 @@ var winston = require('winston');
 
 var logger = new (winston.Logger)({
     transports: [
-        new winston.transports.Console({ level: 'info' }),
-        new winston.transports.File({ filename: 'logs/application.log', level: 'info' })
+//        new winston.transports.Console({ level: settings.logging.level }),
+//        new winston.transports.File({ filename: 'logs/application.log', level: settings.logging.level })
+       new winston.transports.Console({ level: logLevel }),
+       new winston.transports.File({ filename: 'logs/application.log', level: logLevel })
         //new winston.transports.Couchdb({ 'host': 'localhost', 'db': 'logs' })
         //new winston.transports.Riak({ bucket: 'logs' })
         //new winston.transports.MongoDB({ db: 'nodejsauthapp_logs', level: 'info'})

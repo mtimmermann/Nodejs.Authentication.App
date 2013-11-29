@@ -8,6 +8,7 @@
  * Module Dependencies 
  */
 var express = require('express'),
+    settings = require('./config/application.config').application,
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
@@ -61,11 +62,6 @@ fs.readdirSync('./controllers').forEach(function (file) {
 });
 
 
-// logger.log('silly', 'silly test');
-// logger.log('debug', 'debug test');
-// logger.log('verbose', 'verbose test');
-// logger.log('info', 'info test');
-// logger.log('warn', 'warn test');
-// logger.log('error', 'error test');
+logger.log('info', 'Starting server on port: '+ settings.port);
 
-http.createServer(app).listen(8003);
+http.createServer(app).listen(settings.port);
