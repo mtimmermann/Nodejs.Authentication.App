@@ -43,7 +43,14 @@ var logger = new (winston.Logger)({
         //new winston.transports.Riak({ bucket: 'logs' })
     ],
     exceptionHandlers: [
-        new winston.transports.File({ filename: logSettings.logFileExcpetion })
+        new winston.transports.File({ filename: logSettings.logFileExcpetion, maxsize: 20000 }),
+        new winston.transports.MongoDB({
+            db: logSettings.db.database,
+            collection: 'exceptions',
+            port: logSettings.db.port,
+            host: logSettings.db.host,
+            safe: true // If true(default), second round trip to db to confirm log entry
+        })
     ]
 });
 
