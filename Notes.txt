@@ -43,5 +43,11 @@ npmConfig.levels = {
 };
 
 
+Node.js model validation
+------------------------
+https://npmjs.org/package/nodejs-model
+
+Mongoose validation
+http://mongoosejs.com/docs/validation.html
 
 

@@ -43,7 +43,14 @@ var logger = new (winston.Logger)({
         //new winston.transports.Riak({ bucket: 'logs' })
     ],
     exceptionHandlers: [
-        new winston.transports.File({ filename: logSettings.logFileExcpetion, maxsize: 20000 }),
+        new winston.transports.Console(),
+        //new winston.transports.File({ filename: logSettings.logFileExcpetion, maxsize: 20000 }),
+        new winston.transports.DailyRotateFile({
+            filename: logSettings.logFileExcpetion,
+            datePattern: '.yyyy-MM-dd',
+            maxsize: 20000,
+            maxFiles: 20
+        }),
         new winston.transports.MongoDB({
             db: logSettings.db.database,
             collection: 'exceptions',

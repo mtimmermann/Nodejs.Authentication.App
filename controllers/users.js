@@ -1,12 +1,15 @@
 var User = require('../models/User'),
-    ControllerAuth = require('../shared/controllerauth'),
-    hash = require('../shared/pass').hash;
+    ControllerAuth = require('../shared/controller_auth'),
+    ControllerError = require('../shared/controller_error')
+    hash = require('../shared/pass').hash,
+    logger = require('../shared/logger'),
+    $ = require('jquery');
 
 module.exports.controllers = function(app) {
 
     app.get('/user', ControllerAuth.authorize, function(req, res) {
         return User.findById(req.session.user._id, function(err, doc) {
-            if (err) throw err;
+            if (err) { return ControllerError.errorHandler(req, res, err); }
             var result = doc.toObject();
             result.id = doc._id;
             delete result._id;
@@ -19,10 +22,23 @@ module.exports.controllers = function(app) {
     app.post('/register', isUserUnique, function (req, res) {
         var password = req.body.password;
 
-        // TODO: Validate incoming data
+        // TODO: Find a better solution. The Mongo User schema does not contain
+        //  a password field, temporarily canning a Mongo 'ValidationError'
+        if (!password) {
+            var validationErrorJson = {"message":"Validation failed","name":"ValidationError","errors":{"password":{"message":"Path `password` is required.","name":"ValidatorError","path":"password","type":"required"}}};
+            logger.log('info', validationErrorJson);
+            res.statusCode = 400;
+            res.send(JSON.stringify({
+                code: res.statusCode,
+                message: 'Bad Request',
+                description: 'Validation Error',
+                error: validationErrorJson
+            }));
+            return;
+        }
 
         hash(password, function (err, salt, hash) {
-            if (err) throw err;
+            if (err) { return ControllerError.errorHandler(req, res, err); }
             var user = new User({
                 email: req.body.email.toLowerCase(),
                 firstName: req.body.firstName,
@@ -31,13 +47,14 @@ module.exports.controllers = function(app) {
                 salt: salt,
                 hash: hash,
             }).save(function (err, newUser) {
-                if (err) throw err;
+                if (err) { return ControllerError.errorHandler(req, res, err); }
+
                 authenticate(newUser.email, password, function(err, user) {
                     if (user) {
                         req.session.regenerate(function() {
                             req.session.user = user;
                             req.session.success = 'Authenticated as ' + user.email;
-                            return res.send(JSON.stringify({ IsSuccess: true }));
+                            res.send(JSON.stringify({ IsSuccess: true }));
                         });
                     }
                 });
@@ -47,28 +64,40 @@ module.exports.controllers = function(app) {
 
     app.post('/login', function (req, res) {
         authenticate(req.body.username, req.body.password, function (err, user) {
-            if (user) {
+            if (err) {
+                if (err.message && (err.message === 'User not found' || 
+                    err.message === 'Invalid password')) {
+                        logger.log('verbose', 'login -> '+ err.message)
+                        // Display same 404 message to client, regardless of
+                        //  incorrect password or user not found
+                        var errorDescription = 'Authentication failed, please '+
+                                               'check your username and password.';
+                        req.session.error = errorDescription;
+                        res.statusCode = 401;
+                        res.send(JSON.stringify({
+                            code: res.statusCode,
+                            message: 'Not Authorized',
+                            description: errorDescription
+                        }));
+                } else {
+                    return ControllerError.errorHandler(req, res, err);
+                }
+            }
+
+            else if (user) {
                 req.session.regenerate(function () {
                     req.session.user = user;
                     req.session.success = 'Authenticated as ' + user.email;
-                    return res.send(JSON.stringify({ IsSuccess: true }));
+                    logger.log('verbose', 'Authenticated as ' + user.email);
+                    res.send(JSON.stringify({ IsSuccess: true }));
                 });
-            } else {
-                var errorDescription = 'Authentication failed, please check your username and password.';
-                req.session.error = errorDescription;
-                res.statusCode = 401;
-                return res.send(JSON.stringify({
-                    code: res.statusCode,
-                    message: 'Not Authorized',
-                    description: errorDescription
-                }));
             }
         });
     });
 
     app.get('/logout', function (req, res) {
         req.session.destroy(function () {
-            return res.send(JSON.stringify({ IsSuccess: true }));
+            res.send(JSON.stringify({ IsSuccess: true }));
         });
     });
 
@@ -77,7 +106,9 @@ module.exports.controllers = function(app) {
      * Helper methods
      */
     function authenticate(name, pass, fn) {
-        //if (!module.parent) console.log('authenticating %s:%s', name, pass);
+        if (!module.parent) {
+            logger.log('verbose', 'Authenticating %s', name);
+        }
 
         User.findOne({
             email: name.toLowerCase()
@@ -85,14 +116,16 @@ module.exports.controllers = function(app) {
 
         function (err, user) {
             if (user) {
-                if (err) return fn(new Error('cannot find user'));
+                if (err) return fn(new Error('User not found'));
                 hash(pass, user.salt, function (err, hash) {
-                    if (err) return fn(err);
-                    if (hash == user.hash) return fn(null, user);
-                    fn(new Error('invalid password'));
+                    if (err) { return fn(err); }
+                    if (hash == user.hash) {
+                        return fn(null, user);
+                    }
+                    return fn(new Error('Invalid password'));
                 });
             } else {
-                return fn(new Error('cannot find user'));
+                return fn(new Error('User not found'));
             }
         });
     }
@@ -107,7 +140,7 @@ module.exports.controllers = function(app) {
                 var errorDescription = '409 Conflict: User exists';
                 req.session.error = errorDescription;
                 res.statusCode = 409;
-                return res.send(JSON.stringify({
+                res.send(JSON.stringify({
                     code: res.statusCode,
                     message: 'User exists',
                     description: errorDescription

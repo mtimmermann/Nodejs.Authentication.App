@@ -1,5 +1,5 @@
 var Contact = require('../models/Contact'),
-    ControllerAuth = require('../shared/controllerauth'),
+    ControllerAuth = require('../shared/controller_auth'),
     fs = require('fs'),
     $ = require('jquery');
 
