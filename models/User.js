@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    ModelValidation = require('../shared/model_validation');
 
 var UserSchema = new mongoose.Schema({
     email: { type: String, required: true },
@@ -8,6 +9,11 @@ var UserSchema = new mongoose.Schema({
     salt: String,
     hash: String
 });
+
+UserSchema.path('email').validate(function (email) {
+    return ModelValidation.isEmailValid(email);
+}, 'Invalid email');
+
 var User = mongoose.model('users', UserSchema);
 
 module.exports = User;

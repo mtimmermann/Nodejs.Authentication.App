@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    ModelValidation = require('../shared/model_validation');
 
 var ContactSchema = new mongoose.Schema({
     ownerId: String, // User id
@@ -14,6 +15,11 @@ var ContactSchema = new mongoose.Schema({
     picture: String,
     description: String
 });
+
+ContactSchema.path('email1').validate(function (email1) {
+    return ModelValidation.isEmailValid(email);
+}, 'Invalid email');
+
 var Contact = mongoose.model('contacts', ContactSchema);
 
 module.exports = Contact;

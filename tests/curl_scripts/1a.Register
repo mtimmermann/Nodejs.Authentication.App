@@ -8,6 +8,7 @@ lastName='testing1'
 
 source .config
 
+username='asdf@a.c'
 
 # Output verbose curl result to .tmp_login file (contains the new Session ID)
 #curl -v --insecure -X POST -d "username=$email&password=$password" "$url_base$service_call" > .tmp_login 2>&1
