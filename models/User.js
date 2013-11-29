@@ -1,7 +1,5 @@
 var mongoose = require('mongoose');
 
-//module.exports.models = function(app, mongoose) {
-
 var UserSchema = new mongoose.Schema({
     email: String,
     firstName: String,

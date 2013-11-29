@@ -73,7 +73,9 @@ module.exports.controllers = function(app) {
     });
 
 
-    // Helper methods
+    /**
+     * Helper methods
+     */
     function authenticate(name, pass, fn) {
         //if (!module.parent) console.log('authenticating %s:%s', name, pass);
 

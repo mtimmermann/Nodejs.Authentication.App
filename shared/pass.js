@@ -1,5 +1,5 @@
 
-// check out https://github.com/visionmedia/node-pwd
+// https://github.com/visionmedia/node-pwd
 
 /**
  * Module dependencies.
@@ -10,13 +10,11 @@ var crypto = require('crypto');
 /**
  * Bytesize.
  */
-
 var len = 128;
 
 /**
  * Iterations. ~300ms
  */
-
 var iterations = 12000;
 
 /**
@@ -28,7 +26,6 @@ var iterations = 12000;
  * @param {Function} callback
  * @api public
  */
-
 exports.hash = function (pwd, salt, fn) {
     if (3 == arguments.length) {
         crypto.pbkdf2(pwd, salt, iterations, len, fn);

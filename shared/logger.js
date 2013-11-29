@@ -4,9 +4,6 @@ var winston = require('winston'),
 //require('winston-riak').Riak;
 require('winston-mongodb').Mongo;
 
-// https://github.com/flatiron/winston
-// http://docs.nodejitsu.com/articles/intermediate/how-to-log
-
 // Log levels
 // https://github.com/flatiron/winston/blob/master/lib/winston/config/npm-config.js
 // npmConfig.levels = {
@@ -43,7 +40,6 @@ var logger = new (winston.Logger)({
             level: logSettings.logLevel
         })
 
-        //new winston.transports.Couchdb({ 'host': 'localhost', 'db': 'logs' })
         //new winston.transports.Riak({ bucket: 'logs' })
     ],
     exceptionHandlers: [

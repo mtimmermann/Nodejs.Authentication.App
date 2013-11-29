@@ -1,8 +1,4 @@
-// Mongo or Redis session storage
-// http://blog.modulus.io/nodejs-and-express-sessions
 
-// MVC w/ node & express
-// http://timstermatic.github.io/blog/2013/08/17/a-simple-mvc-framework-with-node-and-express/
 
 /**
  * External Module Dependencies 
@@ -38,10 +34,6 @@ app.configure(function () {
         }),
         secret: '1234567890QWERTY'
     }));
-
-    // app.use(express.static(path.join(__dirname, 'public')));
-    // app.set('views', __dirname + '/views');
-    // app.set('view engine', 'jade');
 });
 
 app.use(function (req, res, next) {
