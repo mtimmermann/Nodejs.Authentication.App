@@ -1,25 +1,30 @@
 var User = require('../models/User'),
     ControllerAuth = require('../shared/controller_auth'),
     ControllerError = require('../shared/controller_error'),
+    ApplicationError = require('../shared/error/ApplicationError'),
     hash = require('../shared/pass').hash,
     logger = require('../shared/logger'),
+    util = require('util'), // Node util module
     $ = require('jquery');
 
 module.exports.controllers = function(app) {
 
     app.get('/user', ControllerAuth.authorize, function(req, res) {
-        return User.findById(req.session.user._id, function(err, doc) {
+        return User.findById(req.session.user._id, function(err, user) {
             if (err) { return ControllerError.errorHandler(req, res, err); }
-            if (!doc) {
-                err = new Error('Cannot find user (id:'+ req.session.user._id +') '+
-                    'authroized session', req.session.user._id);
+            if (!user) {
+                // Handling the case where a user has been removed, but the
+                //  session still exists in the db.
+                err = new ApplicationError.AuthorizationError(util.format(
+                    'Cannot find user[%s] in authorized ' +
+                    'session', req.session.user._id));
                 err.status = 500;
                 req.session.destroy();
                 return ControllerError.errorHandler(req, res, err);
             }
 
-            var result = doc.toObject();
-            result.id = doc._id;
+            var result = user.toObject();
+            result.id = user._id;
             delete result._id;
             delete result.salt;
             delete result.hash;
