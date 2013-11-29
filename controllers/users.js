@@ -1,6 +1,6 @@
 var User = require('../models/User'),
     ControllerAuth = require('../shared/controller_auth'),
-    ControllerError = require('../shared/controller_error')
+    ControllerError = require('../shared/controller_error'),
     hash = require('../shared/pass').hash,
     logger = require('../shared/logger'),
     $ = require('jquery');
@@ -36,6 +36,8 @@ module.exports.controllers = function(app) {
             }));
             return;
         }
+
+        // TODO: User model validation, add email regex
 
         hash(password, function (err, salt, hash) {
             if (err) { return ControllerError.errorHandler(req, res, err); }

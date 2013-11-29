@@ -1,5 +1,6 @@
 var Contact = require('../models/Contact'),
     ControllerAuth = require('../shared/controller_auth'),
+    ControllerError = require('../shared/controller_error'),
     fs = require('fs'),
     $ = require('jquery');
 
@@ -129,7 +130,8 @@ module.exports.controllers = function(app) {
         contactObj.ownerId = req.session.user._id;
 
         var contact = new Contact(contactObj).save(function (err, doc) {
-            if (err) throw err;
+//            if (err) throw err;
+            if (err) { return ControllerError.errorHandler(req, res, err); }
             var result = doc.toObject();
             result.id = doc._id;
             delete result._id;
