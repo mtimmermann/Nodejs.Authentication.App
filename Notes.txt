@@ -30,15 +30,11 @@ Mongoose - MongoDB
 Timestamps:
   mongoose-timestamp: https://github.com/drudge/mongoose-timestamp
         "mongoose-timestamp": "~0.1.1",
-        createdAt not working
   mongoose-createdmodified: https://npmjs.org/package/mongoose-createdmodified
         "mongoose-createdmodified": "~0.0.2",
-        modified not being updated
   mongoose-troop: https://github.com/tblobaum/mongoose-troop#timestamp
         Inlcudes other utilities, looks impressive
-        created not working
-  http://stackoverflow.com/questions/12669615/add-created-at-and-updated-at-fields-to-mongoose-schemas
-  http://mongoosejs.com/docs/plugins.html
+
 
   Use Schema.save, not Schema.findByIdAndUpdate as only save executes Schema.pre('save')
   Mongoose issue: pre, post middleware are not executed on findByIdAndUpdate
