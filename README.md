@@ -102,8 +102,8 @@ If installing NGINX, I've created a bash script to retrieve and build NGINX(v.1.
 
 Symlinks in /opt/mark/www/ :
 ```
-contactsmarionettepics -> /home/mark/Projects/Contacts.Marionette.App/pics/
-contactsmarionetteui -> /home/mark/Projects/Contacts.Marionette.UI/deploy/
+nodeauthenticationpics -> ~/Projects/Nodejs.Authentication.App/pics/
+nodeauthenticationui -> ~/Projects/Nodejs.Authentication.UI/deploy/
 ```
 
 
@@ -113,8 +113,6 @@ After NodeJS, MongoDB, and NGINX (or other) are installed...
 Install the project dependencies:
 **npm install**
 
-Initialize the Mongo DB, from the root of the project directory run:
-**node config/initialize_db.js**
 
 Run the app
 **node app.js**

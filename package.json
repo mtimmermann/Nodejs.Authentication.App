@@ -1,5 +1,5 @@
 {
-    "name": "nodejs.authentication.app",
+    "name": "Nodejs.Authentication.App",
     "author": "Mark Timmermann",
     "version": "0.0.1",
     "description": "A Boilerplate for building a restful Node.js services app",
