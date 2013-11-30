@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
 	timestamp = require('../shared/models/timestamp'),
-    ModelValidation = require('../shared/model_validation');
+    ModelValidation = require('../shared/models/validation');
 
 var UserSchema = new mongoose.Schema({
     email: { type: String, required: true },
