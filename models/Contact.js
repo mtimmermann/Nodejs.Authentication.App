@@ -1,5 +1,5 @@
 var mongoose = require('mongoose'),
-    timestamps = require('mongoose-timestamp'),
+    timestamp = require('../shared/models/timestamp'),
     ModelValidation = require('../shared/model_validation');
 
 var ContactSchema = new mongoose.Schema({
@@ -18,10 +18,10 @@ var ContactSchema = new mongoose.Schema({
 });
 
 ContactSchema.path('email1').validate(function (email1) {
-    return ModelValidation.isEmailValid(email);
+    return ModelValidation.isEmailValid(email1);
 }, 'Invalid email');
 
-//ContactSchema.plugin(timestamps);
+ContactSchema.plugin(timestamp);
 var Contact = mongoose.model('contacts', ContactSchema);
 
 module.exports = Contact;

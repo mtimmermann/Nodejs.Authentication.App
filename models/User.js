@@ -1,5 +1,5 @@
 var mongoose = require('mongoose'),
-	timestamps = require('mongoose-timestamp'),
+	timestamp = require('../shared/models/timestamp'),
     ModelValidation = require('../shared/model_validation');
 
 var UserSchema = new mongoose.Schema({
@@ -15,7 +15,7 @@ UserSchema.path('email').validate(function (email) {
     return ModelValidation.isEmailValid(email);
 }, 'Invalid email');
 
-UserSchema.plugin(timestamps);
+UserSchema.plugin(timestamp);
 var User = mongoose.model('users', UserSchema);
 
 module.exports = User;

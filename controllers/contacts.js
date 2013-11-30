@@ -106,7 +106,13 @@ module.exports.controllers = function(app) {
                 }));
             }
             if (contact.ownerId === req.session.user._id) {
-                Contact.findByIdAndUpdate(req.params.id, contactObj, { new: true }, function(err, doc) {
+                // Using Schema.save, not Schema.findByIdAndUpdate as only save
+                //  executes Schema.pre('save')
+                // Mongoose issue: pre, post middleware are not executed on findByIdAndUpdate
+                // https://github.com/LearnBoost/mongoose/issues/964
+                //Contact.findByIdAndUpdate(req.params.id, contactObj, { new: true }, function(err, doc) {
+                contact = $.extend(contact, contactObj);
+                contact.save(function(err, doc) {
                     if (err) { return errorHandler(req, res, err); }
                     var result = doc.toObject();
                     result.id = doc._id;
