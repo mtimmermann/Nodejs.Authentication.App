@@ -25,6 +25,10 @@ app.configure(function () {
     app.set('view engine', 'jade');
 });
 
+Mongoose - MongoDB
+------------------
+Timestamps mongoos-timestamp - https://github.com/drudge/mongoose-timestamp
+
 
 Winston logging
 ----------------
